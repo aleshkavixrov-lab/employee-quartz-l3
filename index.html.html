@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURUM CORPORATION :: Archive Access Control System - Уровень 3</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-dark: #0a0a0f;
+            --secondary-dark: #141421;
+            --accent-purple: #6a0dad;
+            --accent-dark-purple: #4b0082;
+            --accent-red: #8b0000;
+            --text-primary: #f0f0f0;
+            --text-secondary: #b0b0c0;
+            --border-color: #2a2a3a;
+            --success-color: #2e8b57;
+            --warning-color: #daa520;
+            --error-color: #8b0000;
+            --panel-bg: rgba(20, 20, 33, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(20, 20, 33, 0.9) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(10, 10, 15, 0.9) 0%, transparent 20%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%230a0a0f"/><path d="M0,50 L100,50 M50,0 L50,100" stroke="%232a2a3a" stroke-width="0.3"/><circle cx="50" cy="50" r="2" fill="%236a0dad" opacity="0.3"/></svg>');
+            letter-spacing: 0.5px;
+        }
+
+        .header {
+            background: linear-gradient(180deg, #0a0a0f 0%, #141421 100%);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-purple), transparent);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            font-size: 2.2rem;
+            color: var(--accent-purple);
+            text-shadow: 0 0 10px rgba(106, 13, 173, 0.3);
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+        }
+
+        .logo-text p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+            letter-spacing: 1px;
+        }
+
+        .header-status {
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            background-color: rgba(42, 42, 58, 0.7);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(106, 13, 173, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1; 
+                box-shadow: 0 0 8px var(--success-color);
+            }
+            50% { 
+                opacity: 0.5; 
+                box-shadow: 0 0 4px var(--success-color);
+            }
+        }
+
+        .main-container {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .access-panel {
+            background-color: var(--panel-bg);
+            border-radius: 2px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .access-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-purple), transparent);
+        }
+
+        .panel-header {
+            background: linear-gradient(90deg, rgba(20, 20, 33, 0.9), rgba(42, 42, 58, 0.8));
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .panel-header h2 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .panel-content {
+            padding: 2rem;
+        }
+
+        .access-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background-color: rgba(10, 10, 15, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 2px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            font-family: 'Consolas', monospace;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 1px rgba(106, 13, 173, 0.2);
+            background-color: rgba(10, 10, 15, 0.9);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 2px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'Consolas', monospace;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, var(--accent-purple), var(--accent-dark-purple));
+            color: #fff;
+            border: 1px solid rgba(106, 13, 173, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(180deg, var(--accent-dark-purple), var(--accent-purple));
+            box-shadow: 0 0 15px rgba(106, 13, 173, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-purple);
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 2px;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: fadeIn 0.5s;
+            border-left: 3px solid;
+            background-color: rgba(20, 20, 33, 0.8);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message i {
+            font-size: 1.2rem;
+        }
+
+        .message-error {
+            border-left-color: var(--error-color);
+            background-color: rgba(139, 0, 0, 0.1);
+            color: #ff9999;
+        }
+
+        .message-warning {
+            border-left-color: var(--warning-color);
+            background-color: rgba(218, 165, 32, 0.1);
+            color: #ffd700;
+        }
+
+        .message-success {
+            border-left-color: var(--success-color);
+            background-color: rgba(46, 139, 87, 0.1);
+            color: #90ee90;
+        }
+
+        .message-info {
+            border-left-color: var(--accent-purple);
+            background-color: rgba(42, 42, 58, 0.5);
+            color: var(--text-secondary);
+        }
+
+        .dossier-container {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .dossier-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .dossier-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100px;
+            height: 1px;
+            background: var(--accent-purple);
+        }
+
+        .dossier-title {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .dossier-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+            letter-spacing: 0.5px;
+        }
+
+        .dossier-section {
+            background-color: var(--panel-bg);
+            border-radius: 2px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            position: relative;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .dossier-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-purple), transparent);
+            opacity: 0.3;
+        }
+
+        .section-header {
+            background: linear-gradient(90deg, rgba(20, 20, 33, 0.9), rgba(42, 42, 58, 0.8));
+            padding: 0.9rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .section-header:hover {
+            background: linear-gradient(90deg, rgba(42, 42, 58, 0.9), rgba(20, 20, 33, 0.8));
+        }
+
+        .section-header h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+        }
+
+        .section-content {
+            padding: 0 1.2rem;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .section-content.expanded {
+            padding: 1.2rem;
+            max-height: 5000px;
+            opacity: 1;
+        }
+
+        .data-row {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(42, 42, 58, 0.5);
+            font-size: 0.9rem;
+            animation: fadeInRow 0.3s ease-out;
+        }
+
+        @keyframes fadeInRow {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-value {
+            color: var(--text-primary);
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .classified {
+            color: #ff6b6b;
+            background-color: rgba(139, 0, 0, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 1px;
+            font-style: italic;
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            font-size: 0.85rem;
+        }
+
+        .classified-active {
+            color: #90ee90;
+            background-color: rgba(46, 139, 87, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 1px;
+            font-style: italic;
+            border: 1px solid rgba(46, 139, 87, 0.3);
+            font-size: 0.85rem;
+        }
+
+        .redacted {
+            background-color: #000;
+            color: #000;
+            padding: 0.1rem 0.3rem;
+            border-radius: 1px;
+            user-select: none;
+            border: 1px solid #222;
+        }
+
+        .redacted:hover {
+            background-color: #000;
+            color: #000;
+        }
+
+        .data-lost {
+            color: var(--warning-color);
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(218, 165, 32, 0.1),
+                rgba(218, 165, 32, 0.1) 10px,
+                rgba(218, 165, 32, 0.05) 10px,
+                rgba(218, 165, 32, 0.05) 20px
+            );
+            padding: 1rem;
+            border: 1px solid rgba(218, 165, 32, 0.3);
+            border-radius: 2px;
+            margin: 0.5rem 0;
+            font-style: italic;
+            position: relative;
+            animation: pulseWarning 2s infinite;
+        }
+
+        @keyframes pulseWarning {
+            0%, 100% { 
+                border-color: rgba(218, 165, 32, 0.3);
+                box-shadow: 0 0 5px rgba(218, 165, 32, 0.1);
+            }
+            50% { 
+                border-color: rgba(218, 165, 32, 0.5);
+                box-shadow: 0 0 10px rgba(218, 165, 32, 0.2);
+            }
+        }
+
+        .data-lost::before {
+            content: "⚠";
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            opacity: 0.5;
+        }
+
+        .data-lost-content {
+            margin-left: 1.5rem;
+        }
+
+        .encrypted-section {
+            background: linear-gradient(90deg, rgba(139, 0, 0, 0.1), rgba(42, 42, 58, 0.3));
+            position: relative;
+        }
+
+        .encrypted-section .section-header {
+            cursor: not-allowed;
+            background: linear-gradient(90deg, rgba(139, 0, 0, 0.2), rgba(42, 42, 58, 0.4));
+        }
+
+        .encrypted-title {
+            background: repeating-linear-gradient(
+                45deg,
+                #000,
+                #000 1px,
+                #111 1px,
+                #111 2px
+            );
+            color: #000;
+            padding: 0.1rem 0.3rem;
+            border-radius: 1px;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #222;
+        }
+
+        .encrypted-icon {
+            color: #8b0000 !important;
+        }
+
+        .access-warning {
+            background-color: rgba(218, 165, 32, 0.1);
+            border: 1px solid rgba(218, 165, 32, 0.3);
+            border-radius: 2px;
+            padding: 0.8rem 1rem;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.85rem;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .access-warning i {
+            color: var(--warning-color);
+            font-size: 1.2rem;
+        }
+
+        .access-warning strong {
+            color: var(--warning-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer {
+            background-color: var(--secondary-dark);
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-purple), transparent);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .footer-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(42, 42, 58, 0.5);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-purple);
+        }
+
+        .footer-corporate {
+            text-align: center;
+            font-style: italic;
+            opacity: 0.7;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeInModal 0.3s ease-out;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: var(--panel-bg);
+            border-radius: 2px;
+            border: 1px solid var(--border-color);
+            max-width: 500px;
+            width: 90%;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            position: relative;
+            animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-purple), transparent);
+        }
+
+        .modal-header {
+            background: linear-gradient(90deg, rgba(20, 20, 33, 0.9), rgba(42, 42, 58, 0.8));
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h3 {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-body {
+            padding: 1.2rem;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            background-color: rgba(20, 20, 33, 0.5);
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            animation: fadeInModal 0.3s ease-out;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid transparent;
+            border-top-color: var(--accent-purple);
+            border-right-color: var(--accent-purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            animation: pulseText 1.5s infinite;
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .dossier-loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            background-color: var(--panel-bg);
+            border-radius: 2px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .dossier-loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 2px solid transparent;
+            border-top-color: var(--accent-purple);
+            border-right-color: var(--accent-purple);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        /* НОВЫЕ СТИЛИ ДЛЯ ЗАШИФРОВАННЫХ РАЗДЕЛОВ 11,12,13 */
+        #encryptedSections11_13 .section-header h3 {
+            color: #8b0000 !important;
+        }
+
+        /* ИСПРАВЛЕНИЕ: Делаем зашифрованные разделы 5, 6, 7 красными */
+        #encryptedSections .section-header h3 {
+            color: #8b0000 !important;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .header-status {
+                text-align: left;
+            }
+            
+            .data-row {
+                grid-template-columns: 1fr;
+                gap: 0.3rem;
+            }
+            
+            .footer-main {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">ЗАГРУЗКА ДОСЬЕ...</div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>AURUM CORPORATION</h1>
+                    <p>ARCHIVE ACCESS CONTROL SYSTEM - УРОВЕНЬ 3</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <p>System version: 2.8.1</p>
+                <p id="currentDate">Date: 17.01.2059</p>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>SYSTEM ACTIVE</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Access Panel -->
+        <div class="access-panel" id="accessPanel">
+            <div class="panel-header">
+                <h2><i class="fas fa-key"></i> АУТЕНТИФИКАЦИЯ ДОСТУПА (УРОВЕНЬ 3)</h2>
+            </div>
+            <div class="panel-content">
+                <div class="access-form">
+                    <div class="form-group">
+                        <label class="form-label">ПАРОЛЬ ДОСТУПА</label>
+                        <input type="password" class="form-input" id="password" placeholder="ВВЕДИТЕ ПАРОЛЬ ДОСТУПА" autocomplete="off">
+                    </div>
+                    
+                    <div id="messageContainer"></div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-redo"></i> СБРОС
+                        </button>
+                        <button class="btn btn-primary" onclick="checkAccess()">
+                            <i class="fas fa-unlock"></i> ПОДТВЕРДИТЬ ДОСТУП
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dossier Content -->
+        <div class="dossier-container" id="dossierContainer">
+            <div class="dossier-loading" id="dossierLoading">
+                <div class="dossier-loading-spinner"></div>
+                <div class="loading-text">ДЕШИФРАЦИЯ ДАННЫХ...</div>
+            </div>
+            
+            <div id="dossierContent" style="display: none;">
+                <div class="dossier-header">
+                    <div>
+                        <h1 class="dossier-title">ДОСЬЕ СОТРУДНИКА AURUM CORPORATION</h1>
+                        <p class="dossier-meta">Индекс: A.S.A-<span id="desField1">████</span>-PER-077-Ψ-QTZ | Последнее обновление: <span id="dossierDate">17.01.2059</span></p>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary" onclick="returnToAccess()">
+                            <i class="fas fa-arrow-left"></i> ВЕРНУТЬСЯ
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Section 1: Идентификаторы и биография -->
+                <div class="dossier-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-id-card"></i> РАЗДЕЛ 1: ИДЕНТИФИКАТОРЫ И БИОГРАФИЧЕСКИЙ ПРОФИЛЬ</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="data-row">
+                            <div class="data-label">1.1. ПРИ РОЖДЕНИИ:</div>
+                            <div class="data-value">ЭМИЛЬ ШВАРЦ. РОДИЛСЯ В ГЕРМАНИИ, ПРЕДПОЛОЖИТЕЛЬНО В СЕМЬЕ СРЕДНЕГО ДОСТАТКА, СВЯЗАННОЙ С ТЕХНИЧЕСКИМИ ИЛИ НАУЧНЫМИ СПЕЦИАЛЬНОСТЯМИ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">1.2. ОБРАЗОВАНИЕ И РАННЕЕ РАЗВИТИЕ:</div>
+                            <div class="data-value">
+                                ПРОЯВЛЯЛ СКЛОННОСТЬ К АНАЛИТИЧЕСКОМУ МЫШЛЕНИЮ, МАТЕМАТИКЕ, ЛОГИКЕ. УЖЕ В ШКОЛЕ ОТЛИЧАЛСЯ ДИСЦИПЛИНИРОВАННОСТЬЮ, МИНИМАЛЬНОЙ ЭМОЦИОНАЛЬНОЙ ЭКСПРЕССИЕЙ, ПРЕДПОЧИТАЛ ИНДИВИДУАЛЬНУЮ РАБОТУ.
+                                <br><br>
+                                РОДНОЙ ЯЗЫК — НЕМЕЦКИЙ, АНГЛИЙСКИЙ ИЗУЧАЛ УГЛУБЛЁННО. ПОЗЖЕ, ЕЩЁ ДО ВЕРБОВКИ, НАЧАЛ ИЗУЧАТЬ РУССКИЙ — ВОЗМОЖНО, ИЗ ИНТЕРЕСА К КУЛЬТУРЕ ИЛИ ИЗ ПРАГМАТИЧНЫХ СООБРАЖЕНИЙ (МИГРАЦИОННЫЕ ТЕНДЕНЦИИ В ЕС ПОСЛЕ ПАНДЕМИИ «ЛЕММА»).
+                            </div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">1.3. СЕМЕЙНОЕ ПОЛОЖЕНИЕ:</div>
+                            <div class="data-value">РОДИТЕЛИ, ВОЗМОЖНО, ПОГИБЛИ ВО ВРЕМЯ ПАНДЕМИИ ИЛИ В РЕЗУЛЬТАТЕ СОЦИАЛЬНЫХ КРИЗИСОВ 2040-Х, ЧТО СДЕЛАЛО ЕГО САМОСТОЯТЕЛЬНЫМ РАНО.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">1.4. ДОВОЕННАЯ СЛУЖБА:</div>
+                            <div class="data-value">
+                                ПОСЛЕ ОКОНЧАНИЯ УЧЁБЫ (ВОЗМОЖНО, ВОЕННО-ТЕХНИЧЕСКОЕ ИЛИ ПОЛИЦЕЙСКОЕ УЧИЛИЩЕ) СЛУЖИЛ В ЕВРОПЕЙСКИХ СИЛАХ, ГДЕ ПРОЯВИЛ СЕБЯ КАК ТАКТИК, СПЕЦИАЛИСТ ПО ЛОГИСТИКЕ И ПРОТИВОДЕЙСТВИЮ ВНУТРЕННИМ УГРОЗАМ.
+                            </div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">1.5. ПРЕДЫДУЩИЕ ОРГАНИЗАЦИИ:</div>
+                            <div class="data-value">
+                                <div class="data-lost">
+                                    <div class="data-lost-content">
+                                        [БОЛЬШАЯ ЧАСТЬ ДАННЫХ ЭТОГО ФРАГМЕНТА БЫЛА УТЕРЯНА В СВЯЗИ С ФИЗИЧЕСКИМ УНИЧТОЖЕНИЕМ АРХИВНЫХ СЕРВЕРОВ PROTECTION COMMITTEE]
+                                        <br><br>
+                                        <strong>ИЗВЕСТНЫЕ ДАННЫЕ:</strong>
+                                        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                                            <li>БЫВШИЙ АГЕНТ M.L.D. - "JIMARA" (MOUNTAIN LANDING DIVISION - "JIMARA"), ОТРЯД FERRETS.</li>
+                                            <li>БЫВШИЙ АГЕНТ T.F.B. (TASK FORCE BERSERK), МАСТЕР СЕРЖАНТ, СУБ-ДИВИЗИЯ "АЛЬФА".</li>
+                                            <li>БЫВШИЙ АГЕНТ L.A.S. (LIQUIDATION GROUP AND SECURITY ASSURANCE), ОТРЯд S.A.</li>
+                                            <li>БЫВШИЙ АГЕНТ T.D.O.S. - 'L.A.S.' (THE DEPARTMENT OF SUPERVISION - LIQUIDATION AND SECURITY), АГЕНТ C.S.S.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">1.6. ОЦЕНКА ОТДЕЛА КАДРОВ:</div>
+                            <div class="data-value">НИЗКАЯ ПОТРЕБНОСТЬ В СОЦИАЛИЗАЦИИ, СПОСОБНОСТЬ К ДОЛГОСРОЧНОМУ ВНЕДРЕНИЮ, БОЛЬШОЙ ОПЫТ — БЫЛИ ЗАМЕЧЕНЫ ОТДЕЛОМ КАДРОВ AURUM CORPORATION.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section 2: Критические идентификаторы и статусный протокол -->
+                <div class="dossier-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-clipboard-check"></i> РАЗДЕЛ 2: КРИТИЧЕСКИЕ ИДЕНТИФИКАТОРЫ И СТАТУСНЫЙ ПРОТОКОЛ</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="data-row">
+                            <div class="data-label">2.1. ОПЕРАТИВНЫЙ ПОЗЫВНОЙ:</div>
+                            <div class="data-value">«КВАРЦ» (QUARTZ)</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">2.2. ТЕКУЩИЙ СТАТУС:</div>
+                            <div class="data-value"><span class="classified-active">АКТИВЕН.</span></div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">2.3. ФИЗИЧЕСКОЕ МЕСТОПОЖЕНИЕ (ПОСЛЕДНЕЕ ОБНОВЛЕНИЕ):</div>
+                            <div class="data-value">СЕКТОР СНГ. ПОДСЕКТОР: ЗАПАДНАЯ СИБИРЬ. РОССИЙСКИЙ ФИЛИАЛ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">2.4. ФОРМАЛЬНОЕ ТРУДОУСТРОЙСТВО (ЛЕГЕНДА ПРИКРЫТИЯ):</div>
+                            <div class="data-value">СТАРШИЙ ИНЖЕНЕР ПО БЕЗОПАСНОСТИ ЦЕПОЧЕК ПОСТАВОК, ОТДЕЛ МАТЕРИАЛЬНО-ТЕХНИЧЕСКОГО ОБЕСПЕЧЕНИЯ, SPUNK-DSHH INC. (РОССИЙСКИЙ ФИЛИАЛ). УДОСТОВЕРЕНИЕ № S-RU-LOG-8874.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section 3: Биометрический контур и физический капсул -->
+                <div class="dossier-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-dna"></i> РАЗДЕЛ 3: БИОМЕТРИЧЕСКИЙ КОНТУР И ФИЗИЧЕСКИЙ КАПСУЛ</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="data-row">
+                            <div class="data-label">3.1. БИОЛОГИЧЕСКИЕ И АНТРОПОМЕТРИЧЕСКИЕ ДАННЫЕ:</div>
+                            <div class="data-value"></div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Происхождение (Генетическое / Документальное):</div>
+                            <div class="data-value">ГЕРМАНИЯ, Г. <span class="redacted">[ДАННЫЕ УДАЛЕНЫ]</span>. ГРАЖДАНСТВО: ГРАЖДАНИН ЕВРОСОЮЗА (ДОКУМЕНТ АННУЛИРОВАН)</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Возраст:</div>
+                            <div class="data-value">26 ЗЕМНЫХ ЛЕТ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Рост / Вес:</div>
+                            <div class="data-value">Рост: 176 СМ. Вес: 71 КГ (± 1.5 КГ В ЗАВИСИМОСТИ ОТ ФАЗЫ ОПЕРАЦИИ).</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Группа крови и резус-фактор:</div>
+                            <div class="data-value">0(I) Rh+. В БАЗЕ ДАННЫХ МЕДПУНКТА AURUM ОТМЕЧЕН КАК "УНИВЕРСАЛЬНЫЙ ДОНОР, ПРИОРИТЕТНЫЙ РЕСУРС ПРИ МАССОВЫХ ПОТЕРЯХ".</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Генетический маркер (Сокращенный профиль):</div>
+                            <div class="data-value">G-PROFILE: EUR-CENT-01A. ОТСУТСТВИЕ ЯВНЫХ ГЕНЕТИЧЕСКИХ ПРЕДРАСПОЛОЖЕННОСТЕЙ К ИЗВЕСТНЫМ НАСЛЕДСТВЕННЫМ ЗАБОЛЕВАНИЯМ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Иммунный статус:</div>
+                            <div class="data-value">ПРИВИТ ПО ПОЛНОЙ СХЕМЕ AURUM (ВКЛЮЧАЯ ЭКСПЕРИМЕНТАЛЬНЫЕ АНТИГЕНЫ К ШТАММАМ "ЛЕММА", "ОМЕГА"). ТИТР АНТИТЕЛ В НОРМЕ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Физическая конституция:</div>
+                            <div class="data-value">МЕЗОМОРФ С ПРИЗНАКАМИ ЭКТОМОРФИИ. КОЭФФИЦИЕНТ СООТНОШЕНИЯ МЫШЕЧНОЙ И ЖИРОВОЙ МАССЫ: 0.89 (ОПТИМАЛЬНО ДЛЯ ВЫНОСЛИВОСТИ). ОТМЕЧАЕТСЯ ПОВЫШЕННАЯ ПЛОТНОСТЬ КОСТНОЙ ТКАНИ (НА 8% ВЫШЕ СРЕДНЕЙ), ВЕРОЯТНО, ГЕНЕТИЧЕСКАЯ ОСОБЕННОСТЬ.</div>
+                        </div>
+                        
+                        <div class="data-row">
+                            <div class="data-label">3.2. ВНЕШНИЕ ИДЕНТИФИКАТОРЫ И МАНЕРЫ:</div>
+                            <div class="data-value"></div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Волосы:</div>
+                            <div class="data-value">ЦВЕТ — ТЕМНЫЙ. СТРУКТУРА — ПРЯМАЯ, СРЕДНЕЙ ГУСТОТЫ. СТИЛЬ — "ФУНКЦИОНАЛЬНАЯ НЕПРИЧЕСАННОСТЬ".</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Глаза:</div>
+                            <div class="data-value">ЦВЕТ — <span class="redacted">[ДАННЫЕ УДАЛЕНЫ В ЦЕЛЯХ ОПЕРАТИВНОЙ БЕЗОПАСНОСТИ]</span>. ОСОБЕННОСТИ: МИНИМАЛЬНАЯ МИМИЧЕСКАЯ АКТИВНОСТЬ ВОКРУГ ГЛАЗНИЦ, ЧТО ЗАТРУДНЯЕТ ВИЗУАЛЬНОЕ ОПРЕДЕЛЕНИЕ ЭМОЦИЙ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Отличительные черты:</div>
+                            <div class="data-value">НЕЗНАЧИТЕЛЬНЫЙ ПЕРЕЛОМ ПЕРЕНОСИЦЫ (ЗАФИКСИРОВАН В 17 ЛЕТ, НЕ КОРРЕКТИРОВАЛСЯ). ОТСУТСТВУЮТ ВИДИМЫЕ ТАТУИРОВКИ, ШРАМЫ ИЛИ ПИРСИНГ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Осанка и движения:</div>
+                            <div class="data-value">ОСАНКА — ПРЯМАЯ, НЕ НАПРЯЖЕННАЯ. ДВИЖЕНИЯ — ЭКОНОМНЫЕ, ПЛАВНЫЕ, ЛИШЕННЫЕ ЛИШНЕЙ КИНЕТИКИ. В ПОКОЕ СКЛОНЕН К НЕПОДВИЖНОСТИ. ВЫСОКИЙ БАЛЛ В ТЕСТЕ "<span class="redacted">████</span>" (СПОСОБНОСТЬ ПОВТОРЯТЬ ДВИЖЕНИЯ ЦЕЛИ БЕЗ ВИДИМОГО НАПРЯЖЕНИЯ).</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section 4: Психологический фактор и эмоциональный контур -->
+                <div class="dossier-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-brain"></i> РАЗДЕЛ 4: ПСИХОЛОГИЧЕСКИЙ ФАКТОР И ЭМОЦИОНАЛЬНЫЙ КОНТУР</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="data-row">
+                            <div class="data-label">4.1. БАЗОВЫЙ ПСИХОТИП:</div>
+                            <div class="data-value">ПРАГМАТИК-СТРАТЕГ (PS-7). ПОДТИП: "ХОЛОДНЫЙ АНАЛИТИК".</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">4.2. РЕЗУЛЬТАТЫ ПОСЛЕДНЕГО ПСИХОТЕСТА (15.07.2058):</div>
+                            <div class="data-value"></div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Логико-аналитический индекс (LAI):</div>
+                            <div class="data-value">9.2/10 (ВЫДАЮЩИЙСЯ).</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Индекс эмоциональной регуляции (ERI):</div>
+                            <div class="data-value">8.7/10 (ВЫСОКИЙ). ОСОБО ОТМЕЧЕНА СПОСОБНОСТЬ К "ЭМОЦИОНАЛЬНОЙ КОНСЕРВАЦИИ" — ОТСРОЧЕННОЙ ОБРАБОТКЕ СТРЕССА БЕЗ ПОТЕРИ ЭФФЕКТИВНОСТИ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Индекс риска (RI):</div>
+                            <div class="data-value">5.1/10 (НИЗКИЙ-СРЕДНИЙ). ПРЕДПОЧИТАЕТ МИНИМИЗИРОВАННЫЙ РИСК ПРИ МАКСИМАЛЬНОЙ ВЫГОДЕ. НЕ СКЛОНЕН К АЗАРТУ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Индекс конформности/лояльности (CLI):</div>
+                            <div class="data-value">8.9/10 (ВЫСОКИЙ). ЛОЯЛЬНОСТЬ ВОСПРИНИМАЕТСЯ КАК РАЦИОНАЛЬНЫЙ ДОГОВОР. ВЫСОКАЯ ВНУТРЕННЯЯ ДИСЦИПЛИНА.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Показатель эмпатии (SEP):</div>
+                            <div class="data-value">6.0/10 (ФУНКЦИОНАЛЬНАЯ НОРМА). РАЗВИТА КОГНИТИВНАЯ ЭМПАТИЯ (ПОНИМАНИЕ МОТИВОВ), АФФЕКТИВНАЯ ЭМПАТИЯ (СОПЕРЕЖИВАНИЕ) — НА СРЕДНЕМ УРОВНЕ, ЧТО СЧИТАЕТСЯ ОПТИМАЛЬНЫМ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Устойчивость к промыванию сознания и внушению (по шкале "<span class="redacted">██████</span>"):</div>
+                            <div class="data-value">87%. ПРОШЕЛ КУРС "<span class="redacted">███████ ██████</span>".</div>
+                        </div>
+                        
+                        <div class="data-row">
+                            <div class="data-label">4.3. КЛЮЧЕВЫЕ ПСИХОЛОГИЧЕСКИЕ МЕХАНИЗМЫ:</div>
+                            <div class="data-value"></div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Принятие решений:</div>
+                            <div class="data-value">МОДЕЛЬ "ОБСЕРВАТОРИЯ-ДЕЙСТВИЕ". ДЛИТЕЛЬНАЯ ФАЗА НАБЛЮДЕНИЯ И АНАЛИЗА, ЗАТЕМ БЫСТРОЕ И РЕШИТЕЛЬНОЕ ДЕЙСТВИЕ. ИНЕРЦИЯ МИНИМАЛЬНА.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Реакция на стресс:</div>
+                            <div class="data-value">ТИП "ФОКУС". ВМЕСТО ПАНИКИ ИЛИ АГРЕССИИ — СУЖЕНИЕ ВНИМАНИЯ ДО КЛЮЧЕВЫХ ПАРАМЕТРОВ ЗАДАЧИ, ОТСЕВ "ШУМА". ФИЗИОЛОГИЧЕСКИЕ ПОКАЗАТЕЛИ (ПУЛЬС, ДАВЛЕНИЕ) ПОВЫШАЮТСЯ НЕЗНАЧИТЕЛЬНО.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Потенциальные девиации (Отчёт "<span class="redacted">██████</span>"):</div>
+                            <div class="data-value">ВСПЫШКИ РАЗДРАЖЕНИЯ ПРИ СТОЛКНОВЕНИИ С "ИРРАЦИОНАЛЬНЫМ САБОТАЖЕМ" ИЛИ ГРУБЫМ НЕПРОФЕССИОНАЛИЗМОМ. СКЛОННОСТЬ ИЗОЛИРОВАТЬСЯ ОТ КОЛЛЕКТИВНЫХ НЕФОРМАЛЬНЫХ АКТИВНОСТЕЙ, ЧТО МОЖЕТ ВОСПРИНИМАТЬСЯ КАК НЕДОСТАТОК "КОМАНДНОГО ДУХА".</div>
+                        </div>
+                        
+                        <div class="data-row">
+                            <div class="data-label">4.4. СОН И ОТДЫХ:</div>
+                            <div class="data-value">ЦИКЛ СНА — 5.5-6 ЧАСОВ В СУТКИ. ПРЕИМУЩЕСТВЕННО ГЛУБОКАЯ ФАЗА. МОЖЕТ ФУНКЦИОНИРОВАТЬ БЕЗ СНА ДО 48 ЧАСОВ С ИСПОЛЬЗОВАНИЕМ СТИМУЛЯТОРОВ БЕЗ ЗНАЧИТЕЛЬНОЙ ПОТЕРИ ЭФФЕКТИВНОСТИ. ПРЕДПОЧИТАЕМЫЙ МЕТОД РЕЛАКСАЦИИ: ИЗОЛИРОВАННОЕ ПРОСЛУШИВАНИЕ КЛАССИЧЕСКОЙ МУЗЫКИ (ЭПОХА БАРОККО).</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Encrypted Sections (for level 3) - теперь только 5, 6, 7 -->
+                <div id="encryptedSections">
+                    <!-- Section 5 Encrypted -->
+                    <div class="dossier-section encrypted-section" onclick="showEncryptedWarning(5)">
+                        <div class="section-header">
+                            <h3><i class="fas fa-ban encrypted-icon"></i> РАЗДЕЛ 5: <span class="encrypted-title">██████ ████████ ████████ ███ ███████████ █ ███</span></h3>
+                            <i class="fas fa-lock encrypted-icon"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 6 Encrypted -->
+                    <div class="dossier-section encrypted-section" onclick="showEncryptedWarning(6)">
+                        <div class="section-header">
+                            <h3><i class="fas fa-ban encrypted-icon"></i> РАЗДЕЛ 6: <span class="encrypted-title">██████ ████████ █████ █████████ ███████ █ ███</span></h3>
+                            <i class="fas fa-lock encrypted-icon"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 7 Encrypted -->
+                    <div class="dossier-section encrypted-section" onclick="showEncryptedWarning(7)">
+                        <div class="section-header">
+                            <h3><i class="fas fa-ban encrypted-icon"></i> РАЗДЕЛ 7: <span class="encrypted-title">█████████ ██████ ████████ █████████ ███████</span></h3>
+                            <i class="fas fa-lock encrypted-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section 8: Оценка лояльности, уязвимостей и потенциала -->
+                <div class="dossier-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-user-shield"></i> РАЗДЕЛ 8: ОЦЕНКА ЛОЯЛЬНОСТИ, УЯЗВИМОСТЕЙ И ПОТЕНЦИАЛА</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="data-row">
+                            <div class="data-label">8.1. ОЦЕНКА ЛОЯЛЬНОСТИ (ОТДЕЛ "<span class="redacted">█████</span>", ОТЧЕТ #<span class="redacted">███-███</span>-Ψ):</div>
+                            <div class="data-value"></div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Лояльность AURUM CORPORATION:</div>
+                            <div class="data-value">ВЫСОКАЯ (УРОВЕНЬ 9/10). ВОСПРИНИМАЕТ AURUM КАК ВОПЛОЩЕНИЕ ПРИНЦИПОВ РАЦИОНАЛЬНОСТИ, ПРОФЕССИОНАЛИЗМА И СИСТЕМНОГО ПОДХОДА. ЭТО СООТВЕТСТВУЕТ ЕГО ВНУТРЕННЕЙ КАРТИНЕ МИРА. КОРПОРАТИВНАЯ КУЛЬТУРА AURUM ДАЁТ ЕМУ ЧУВСТВО ПРЕДСКАЗУЕМОСТИ И КОНТРОЛЯ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Лояльность МИССИИ SPUNK-DSHH:</div>
+                            <div class="data-value">УСЛОВНО-ВЫСОКАЯ (УРОВЕНЬ 7/10). БОРЬБА С "ЛЕММОЙ" И ВНЕШНИМИ УГРОЗАМИ ВОСПРИНИМАЕТСЯ КАК СОЦИАЛЬНО ЗНАЧИМАЯ И ЛОГИЧНАЯ ЦЕЛЬ, ОПРАВДЫВАЮЩАЯ СУЩЕСТВОВАНИЕ СТРУКТУРЫ. К ЭТИЧЕСКИМ ДИЛЕММАМ ЭКСПЕРИМЕНТОВ ОТНОСИТСЯ С ПОЗИЦИИ "ИНСТРУМЕНТАЛЬНОГО УТИЛИТАРИЗМА": ЕСЛИ ПРОЦЕСС ВЕДЁТ К ЦЕЛИ (ВАКЦИНА, СУПЕРСОЛДАТ), ЕГО ЗАДАЧА — ОБЕСПЕЧИТЬ БЕЗОПАСНОСТЬ ПРОЦЕССА, А НЕ ДАВАТЬ ЕМУ МОРАЛЬНЫЕ ОЦЕНКИ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Лояльность КОНКРЕТНЫМ ЛИЦАМ:</div>
+                            <div class="data-value">НИЗКАЯ (УРОВЕНЬ 3/10). ЛОЯЛЬНОСТЬ ПЕРСОНАЛИЗИРУЕТСЯ ТОЛЬКО В ОТНОШЕНИИ НЕПОСРЕДСТВЕННОГО РУКОВОДИТЕЛЯ И ТОЛЬКО НА ОСНОВЕ ДОКАЗАННОЙ КОМПЕТЕНЦИИ И УВАЖЕНИЯ К ПРОФЕССИОНАЛЬНОЙ АВТОНОМИИ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">РИСК ДЕЗЕРТИРСТВА:</div>
+                            <div class="data-value">МИНИМАЛЬНЫЙ (УРОВЕНЬ 1/10). ОТСУТСТВУЮТ ВНЕШНИЕ "ЯКОРЯ" (СЕМЬЯ, СИЛЬНЫЕ ВНЕШНИЕ СВЯЗИ). ЕГО ПРОФЕССИОНАЛЬНАЯ ИДЕНТИЧНОСТЬ ПОЛНОСТЬЮ СЛИТА С РОЛЬЮ В A.S.A. АЛЬТЕРНАТИВ, ПРЕДЛАГАЮЩИХ АНАЛОГИЧНЫЙ УРОВЕНЬ СТРУКТУРЫ, ВЫЗОВА И СТАТУСА, НЕ УСМАТРИВАЕТ.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section 9: Дополнительные сведения и примечания для командования -->
+                <div class="dossier-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-clipboard-list"></i> РАЗДЕЛ 9: ДОПОЛНИТЕЛЬНЫЕ СВЕДЕНИЯ И ПРИМЕЧАНИЯ ДЛЯ КОМАНДОВАНИЯ</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="data-row">
+                            <div class="data-label">9.1. ОТНОШЕНИЕ К МУТАНТАМ И ПАТОГЕНАМ:</div>
+                            <div class="data-value">ВОСПРИНИМАЕТ ИХ КАК "ОПЕРАТИВНЫЕ ЕДИНИЦЫ С РАЗНОЙ СТЕПЕНЬЮ ОПАСНОСТИ И ПРЕДСКАЗУЕМОСТИ". НЕ ИСПЫТЫВАЕТ НИ ОТВРАЩЕНИЯ, НИ НЕЗДОРОВОГО ИНТЕРЕСА. ДЛЯ НЕГО ЭТО ЧАСТЬ ОПЕРАТИВНОЙ СРЕДЫ, КАК ПОГОДА ИЛИ РЕЛЬЕФ. ЭТО ДЕЛАЕТ ЕГО ЭФФЕКТИВНЫМ ПРИ РАБОТЕ В ЗОНАХ КОНТЕЙНМЕНТА.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">9.2. ФИНАНСОВЫЙ ПРОФИЛЬ:</div>
+                            <div class="data-value">ВСЕ СРЕДСТВА ХРАНЯТСЯ НА ВНУТРЕННИХ СЧЕТАХ AURUM. РАСХОДЫ МИНИМАЛЬНЫЕ, СООТВЕТСТВУЮТ ЛЕГЕНДЕ (АРЕНДА ЖИЛЬЯ СРЕДНЕГО КЛАССА, ПИТАНИЕ, ТРАНСПОРТ). НАКОПЛЕНИЯ ЗАПРЕЩЕНЫ ВНЕ СИСТЕМ AURUM. ПОДОЗРЕНИЙ В СКРЫТЫХ АКТИВАХ НЕТ.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section 10: Архивизация и протокол обновления -->
+                <div class="dossier-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-archive"></i> РАЗДЕЛ 10: АРХИВАЦИЯ И ПРОТОКОЛ ОБНОВЛЕНИЯ</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="data-row">
+                            <div class="data-label">10.1. ГРАФИК ОБЯЗАТЕЛЬНОГО ПЕРЕСМОТРА ПРОФИЛЯ:</div>
+                            <div class="data-value">КАЖДЫЕ 6 МЕСЯЦЕВ ИЛИ ПОСЛЕ ЗАВЕРШЕНИЯ КРУПНОЙ ОПЕРАЦИИ.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">10.2. ПОСЛЕДНЯЯ РЕДАКЦИЯ:</div>
+                            <div class="data-value" id="lastEditDate">17.01.2059</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">10.3. АВТОР ПОСЛЕДНЕЙ РЕДАКЦИИ:</div>
+                            <div class="data-value">СИСТЕМНЫЙ АНАЛИТИК.</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">10.4. РАСПРЕДЕЛЕНИЕ КОПИЙ:</div>
+                            <div class="data-value">
+                                <ul style="margin-left: 1.5rem;">
+                                    <li>ЭЛЕКТРОННАЯ КОПИЯ №1: ЦЕНТРАЛЬНЫЙ СЕРВЕР A.S.A., РАЗДЕЛ "АКТИВНЫЙ ПЕРСОНАЛ".</li>
+                                    <li>ЭЛЕКТРОННАЯ КОПИЯ №2: ЛИЧНОЕ ДЕЛО В БАЗЕ ДАННЫХ "AURUM".</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Encrypted Sections 11, 12, 13 для уровня 3 -->
+                <div id="encryptedSections11_13">
+                    <!-- Section 11 Encrypted -->
+                    <div class="dossier-section encrypted-section" onclick="showEncryptedWarning(11)">
+                        <div class="section-header">
+                            <h3><i class="fas fa-ban encrypted-icon"></i> РАЗДЕЛ 11: <span class="encrypted-title">███████ █████████ █ ████████ ███████ ██████</span></h3>
+                            <i class="fas fa-lock encrypted-icon"></i>
+                        </div>
+                    </div>
+
+                    <!-- Section 12 Encrypted -->
+                    <div class="dossier-section encrypted-section" onclick="showEncryptedWarning(12)">
+                        <div class="section-header">
+                            <h3><i class="fas fa-ban encrypted-icon"></i> РАЗДЕЛ 12: <span class="encrypted-title">███████████ ███████ █ ███████████ █████</span></h3>
+                            <i class="fas fa-lock encrypted-icon"></i>
+                        </div>
+                    </div>
+
+                    <!-- Section 13 Encrypted -->
+                    <div class="dossier-section encrypted-section" onclick="showEncryptedWarning(13)">
+                        <div class="section-header">
+                            <h3><i class="fas fa-ban encrypted-icon"></i> РАЗДЕЛ 13: <span class="encrypted-title">███████████ ███████ █ ████████████ ████████</span></h3>
+                            <i class="fas fa-lock encrypted-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Access Warning for Level 3 -->
+                <div id="accessWarning" class="access-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>ДОСТУП ОГРАНИЧЕН</strong>
+                        <p>Ваш уровень доступа (3) не позволяет просматривать полное содержание некоторых разделов. Для получения полного доступа обратитесь к системному администратору.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-main">
+                <div>AURUM CORPORATION Archive Management System - Уровень 3</div>
+                <div class="footer-links">
+                    <span>Version: 2.8.1</span>
+                    <span>Build: <span id="buildDate">17.01.2059</span></span>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-corporate">A.S.A. PROTEGIT. AURUM REGNAT.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Encrypted Section Warning Modal -->
+    <div class="modal" id="encryptedWarningModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock"></i> ДОСТУП К РАЗДЕЛУ ОГРАНИЧЕН</h3>
+            </div>
+            <div class="modal-body">
+                <p>Раздел <strong id="encryptedSectionNumber"></strong> зашифрован и требует более высокого уровня доступа.</p>
+                <p style="margin-top: 1rem;">Для доступа к данному разделу требуется уровень допуска <strong>3-EX</strong>.</p>
+                <p>Все попытки доступа к зашифрованным разделам регистрируются.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEncryptedModal()">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCurrentDate() {
+            const now = new Date();
+            const day = now.getDate().toString().padStart(2, '0');
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            return `${day}.${month}.2059`;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Установка текущей даты
+            const currentDate = getCurrentDate();
+            document.getElementById('currentDate').textContent = `Date: ${currentDate}`;
+            document.getElementById('dossierDate').textContent = currentDate;
+            document.getElementById('lastEditDate').textContent = currentDate;
+            document.getElementById('buildDate').textContent = currentDate;
+            
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAccess();
+                }
+            });
+            
+            document.getElementById('password').focus();
+        });
+        
+        function checkAccess() {
+            const password = document.getElementById('password').value.trim();
+            const messageContainer = document.getElementById('messageContainer');
+            
+            messageContainer.innerHTML = '';
+            
+            if (!password) {
+                showMessage('ПОЖАЛУЙСТА, ВВЕДИТЕ ПАРОЛЬ ДОСТУПА', 'error');
+                return;
+            }
+            
+            if (password === 'THEAURUMCORPORATION_2059') {
+                showMessage('ДОСТУП РАЗРЕШЕН. УРОВЕНЬ 3. ОГРАНИЧЕННЫЙ ПРОСМОТР.', 'success');
+                startDossierLoading();
+            }
+            else {
+                showMessage('НЕВЕРНЫЙ ПАРОЛЬ. ПОПЫТКА ДОСТУПА ЗАРЕГИСТРИРОВАНА.', 'error');
+                document.getElementById('password').style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    document.getElementById('password').style.animation = '';
+                }, 500);
+            }
+        }
+        
+        function startDossierLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                document.getElementById('accessPanel').style.display = 'none';
+                document.getElementById('dossierContainer').style.display = 'block';
+                document.getElementById('dossierLoading').style.display = 'flex';
+                
+                setTimeout(() => {
+                    document.getElementById('dossierLoading').style.display = 'none';
+                    document.getElementById('dossierContent').style.display = 'block';
+                    
+                    document.getElementById('encryptedSections').style.display = 'block';
+                    document.getElementById('encryptedSections11_13').style.display = 'block';
+                    document.getElementById('accessWarning').style.display = 'flex';
+                    
+                    document.querySelectorAll('[id^="desField"]').forEach(field => {
+                        field.textContent = '████';
+                    });
+                    
+                    resetAllSections();
+                }, 1500);
+            }, 2000);
+        }
+        
+        function resetAllSections() {
+            document.querySelectorAll('.section-content').forEach(content => {
+                content.classList.remove('expanded');
+                const icon = content.previousElementSibling.querySelector('.fa-chevron-down, .fa-chevron-up');
+                if (icon) {
+                    icon.className = 'fas fa-chevron-down';
+                }
+            });
+        }
+        
+        function toggleSection(header) {
+            if (header.parentElement.classList.contains('encrypted-section')) {
+                return;
+            }
+            
+            const sectionContent = header.nextElementSibling;
+            const icon = header.querySelector('.fa-chevron-down, .fa-chevron-up');
+            
+            if (sectionContent.classList.contains('expanded')) {
+                sectionContent.classList.remove('expanded');
+                icon.className = 'fas fa-chevron-down';
+            } else {
+                document.querySelectorAll('.section-content').forEach(content => {
+                    content.classList.remove('expanded');
+                    const prevIcon = content.previousElementSibling.querySelector('.fa-chevron-down, .fa-chevron-up');
+                    if (prevIcon) {
+                        prevIcon.className = 'fas fa-chevron-down';
+                    }
+                });
+                
+                sectionContent.classList.add('expanded');
+                icon.className = 'fas fa-chevron-up';
+            }
+        }
+        
+        function showEncryptedWarning(sectionNumber) {
+            document.getElementById('encryptedSectionNumber').textContent = sectionNumber;
+            document.getElementById('encryptedWarningModal').style.display = 'flex';
+        }
+        
+        function closeEncryptedModal() {
+            document.getElementById('encryptedWarningModal').style.display = 'none';
+        }
+        
+        function returnToAccess() {
+            document.getElementById('dossierContainer').style.display = 'none';
+            document.getElementById('dossierContent').style.display = 'none';
+            document.getElementById('dossierLoading').style.display = 'none';
+            
+            document.getElementById('encryptedSections').style.display = 'none';
+            document.getElementById('encryptedSections11_13').style.display = 'none';
+            document.getElementById('accessWarning').style.display = 'none';
+            
+            resetAllSections();
+            
+            document.getElementById('accessPanel').style.display = 'block';
+            resetForm();
+        }
+        
+        function resetForm() {
+            document.getElementById('password').value = '';
+            document.getElementById('messageContainer').innerHTML = '';
+            document.getElementById('password').focus();
+        }
+        
+        function showMessage(text, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            const icon = type === 'error' ? 'exclamation-circle' : 
+                        type === 'warning' ? 'exclamation-triangle' : 
+                        type === 'success' ? 'check-circle' : 'info-circle';
+            
+            messageContainer.innerHTML = `
+                <div class="message message-${type}">
+                    <i class="fas fa-${icon}"></i>
+                    <div>${text}</div>
+                </div>
+            `;
+        }
+
+        // Добавить анимацию тряски
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
